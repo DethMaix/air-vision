@@ -9,6 +9,7 @@ FastAPI backend service for the Air Vision project, providing real-time aircraft
 The Air Vision Server serves as the central API for tracking aircraft. It integrates with external flight data feeds, normalizes telemetry data into typed schemas, and exposes high-performance asynchronous endpoints for frontend consumers and services.
 
 ### Key Capabilities
+
 - **Registration Lookup**: Fetch live telemetry for an aircraft by its tail number/registration.
 - **Geographic Radius Search**: Find all active aircraft within a given distance (nautical miles) of a coordinate point (`lat`/`lon`).
 - **Resilient Upstream Handling**: Managed `httpx` async sessions with custom User-Agent identification, connection pooling, and proactive timeout/rate-limit management.
@@ -28,6 +29,7 @@ The Air Vision Server serves as the central API for tracking aircraft. It integr
 From the `server/` directory:
 
 1. **Create and activate a virtual environment**:
+
    ```bash
    # macOS / Linux (bash/zsh)
    python3 -m venv .venv
@@ -41,7 +43,7 @@ From the `server/` directory:
    ```bash
    pip install -r requirements.txt
    ```
-   *Alternatively, install in editable mode:*
+   _Alternatively, install in editable mode:_
    ```bash
    pip install -e .
    ```
@@ -65,6 +67,7 @@ uvicorn main:app --reload
 ## CORS Configuration
 
 Configured in `app/main.py` to allow requests from the local frontend client:
+
 - **Allowed Origins**: `http://localhost:5173` (Vite dev server)
 - **Allowed Methods**: `*`
 - **Allowed Headers**: `*`
@@ -76,28 +79,30 @@ Configured in `app/main.py` to allow requests from the local frontend client:
 
 ### 1. General Endpoints
 
-| Method | Path | Description | Response Model |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/` | Temporary greeting endpoint | `dict` |
-| `GET` | `/v1/health` | Service health status check | `{"status": "ok"}` |
+| Method | Path         | Description                 | Response Model     |
+| :----- | :----------- | :-------------------------- | :----------------- |
+| `GET`  | `/`          | Temporary greeting endpoint | `dict`             |
+| `GET`  | `/v1/health` | Service health status check | `{"status": "ok"}` |
 
 ### 2. Flight Domain Endpoints (`/v1/flights`)
 
-| Method | Path | Description | Response Model |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/v1/flights/reg/{registration}` | Real-time telemetry for an aircraft by registration | `FlightTelemetryLight` |
-| `GET` | `/v1/flights/point/{lat}/{lon}/{radius_nm}` | Active aircraft within a geographic radius | `list[FlightTelemetryLight]` |
+| Method | Path                                        | Description                                         | Response Model               |
+| :----- | :------------------------------------------ | :-------------------------------------------------- | :--------------------------- |
+| `GET`  | `/v1/flights/reg/{registration}`            | Real-time telemetry for an aircraft by registration | `FlightTelemetryLight`       |
+| `GET`  | `/v1/flights/point/{lat}/{lon}/{radius_nm}` | Active aircraft within a geographic radius          | `list[FlightTelemetryLight]` |
 
 ---
 
 ### Request & Response Examples
 
 #### A. Single Aircraft Registration Lookup
+
 ```bash
 curl http://127.0.0.1:8000/v1/flights/reg/G-NEOP
 ```
 
 **Response (`200 OK`)**:
+
 ```json
 {
   "registration": "G-NEOP",
@@ -108,7 +113,8 @@ curl http://127.0.0.1:8000/v1/flights/reg/G-NEOP
 }
 ```
 
-*If the aircraft is offline or unrecognized (`404 Not Found`):*
+_If the aircraft is offline or unrecognized (`404 Not Found`):_
+
 ```json
 {
   "detail": "Aircraft with registration 'G-NEOP' is not found or offline"
@@ -116,11 +122,13 @@ curl http://127.0.0.1:8000/v1/flights/reg/G-NEOP
 ```
 
 #### B. Geographic Point Radius Query
+
 ```bash
 curl "http://127.0.0.1:8000/v1/flights/point/51.47/-0.45/10"
 ```
 
 **Response (`200 OK`)**:
+
 ```json
 [
   {
@@ -146,15 +154,16 @@ curl "http://127.0.0.1:8000/v1/flights/point/51.47/-0.45/10"
 
 The server adopts domain-driven exception handling. The domain layer raises typed domain exceptions that are intercepted by centralized FastAPI exception handlers in `app/api/errors.py`:
 
-| Domain Exception | HTTP Status | Detail / Meaning |
-| :--- | :--- | :--- |
-| `ADSBTimeoutError` | `504 Gateway Timeout` | Upstream ADS-B service exceeded the 10-second request timeout |
-| `ADSBRateLimitError` | `429 Too Many Requests` | Upstream ADS-B service is throttling requests |
-| `ADSBUpstreamError` | `502 Bad Gateway` | Upstream network failure, 5xx server error, or invalid JSON payload |
-| `HTTPException` | `404 Not Found` | Requested aircraft is offline or no active planes exist in target range |
-| `RequestValidationError` | `422 Unprocessable Content` | Invalid parameter types (e.g., non-numeric coordinates) |
+| Domain Exception         | HTTP Status                 | Detail / Meaning                                                        |
+| :----------------------- | :-------------------------- | :---------------------------------------------------------------------- |
+| `ADSBTimeoutError`       | `504 Gateway Timeout`       | Upstream ADS-B service exceeded the 10-second request timeout           |
+| `ADSBRateLimitError`     | `429 Too Many Requests`     | Upstream ADS-B service is throttling requests                           |
+| `ADSBUpstreamError`      | `502 Bad Gateway`           | Upstream network failure, 5xx server error, or invalid JSON payload     |
+| `HTTPException`          | `404 Not Found`             | Requested aircraft is offline or no active planes exist in target range |
+| `RequestValidationError` | `422 Unprocessable Content` | Invalid parameter types (e.g., non-numeric coordinates)                 |
 
 All error responses strictly follow the standardized JSON structure:
+
 ```json
 {
   "detail": "Error description message"

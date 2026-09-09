@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Routers
 from app.api.v1.routes.health import router as health_router
-from app.api.v1.routes.reg import router as reg_router
+from app.api.v1.routes.flights import router as flights_router
 
 # Exception handlers
 from app.api.errors import register_exception_handlers
@@ -23,7 +23,7 @@ app.add_middleware(
 
 # Routers include
 app.include_router(health_router, prefix="/v1/health")
-app.include_router(reg_router, prefix="/v1/reg")
+app.include_router(flights_router, prefix="/v1")
 
 # Register exception handlers
 register_exception_handlers(app)

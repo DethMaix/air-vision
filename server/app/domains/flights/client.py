@@ -107,6 +107,36 @@ class ADSBClient:
 
         return planes[0]
 
+    async def get_by_point(self, lat: float, lon: float, radius_nm: float) -> list[dict]:
+        """Fetch raw telemetry data for all aircraft within a geographic radius of a point.
+
+        Args:
+            lat: Latitude of the center point in decimal degrees.
+            lon: Longitude of the center point in decimal degrees.
+            radius_nm: Search radius around the center point in nautical miles.
+
+        Returns:
+            Optional[list[dict]]: List of raw aircraft telemetry dictionaries in the area,
+                                  or None if no aircraft are detected or the area is empty.
+
+        Raises:
+            ADSBTimeoutError: If the upstream service times out.
+            ADSBRateLimitError: If upstream returns HTTP 429.
+            ADSBUpstreamError: If upstream returns 5xx, connection fails, or response is invalid.
+        """
+        # Construct API endpoint for geographic point radius query (v2/point/{lat}/{lon}/{radius_nm})
+        endpoint = f"v2/point/{lat}/{lon}/{radius_nm}"
+
+        # Fetch aircraft data from upstream API
+        data = await self._get(endpoint)
+        if not data:
+            return []
+
+        # "ac" contains the list of active aircraft telemetry records in the requested radius
+        planes = data.get("ac", [])
+
+        return planes
+
 
 async def get_adsb_client() -> AsyncGenerator[ADSBClient, None]:
     """FastAPI dependency that yields an ADSBClient instance with a managed httpx session."""

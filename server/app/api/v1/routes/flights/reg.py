@@ -1,14 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.domains.flights.schemas import FlightTelemetry
+from app.domains.flights.schemas import FlightTelemetryLight
 from app.domains.flights.client import ADSBClient, get_adsb_client
 
 # Router initialization
-router = APIRouter(tags=["registration"])
+router = APIRouter()
 
 
-@router.get("/{registration}", response_model=FlightTelemetry)
-async def get_aircraft_by_registration(registration: str, adsb_client: ADSBClient = Depends(get_adsb_client)) -> FlightTelemetry:
+@router.get("/{registration}", response_model=FlightTelemetryLight)
+async def get_aircraft_by_registration(registration: str, adsb_client: ADSBClient = Depends(get_adsb_client)) -> FlightTelemetryLight:
     """Fetch real-time flight telemetry for an aircraft by its registration (tail number).
 
     Args:
@@ -16,7 +16,7 @@ async def get_aircraft_by_registration(registration: str, adsb_client: ADSBClien
         adsb_client: Injected ADSBClient instance managing external API communication.
 
     Returns:
-        FlightTelemetry: Standardized telemetry model containing position, speed, and altitude.
+        FlightTelemetryLight: Standardized telemetry model containing position.
 
     Raises:
         HTTPException: 404 if the aircraft is not found or is currently offline.
@@ -31,13 +31,10 @@ async def get_aircraft_by_registration(registration: str, adsb_client: ADSBClien
         )
 
     # 2. Map raw upstream ADS-B keys to the typed FlightTelemetry schema
-    return FlightTelemetry(
+    return FlightTelemetryLight(
         registration=raw_plane.get("r"),                  # Tail number (e.g., "EI-DEM")
         aircraft_type=raw_plane.get("t"),                 # ICAO aircraft type (e.g., "A320")
         latitude=raw_plane.get("lat"),                    # Latitude in decimal degrees
         longitude=raw_plane.get("lon"),                   # Longitude in decimal degrees
-        altitude_barometric=raw_plane.get("alt_baro"),    # Barometric altitude in feet (or "ground")
-        altitude_geometric=raw_plane.get("alt_geom"),     # GNSS/geometric altitude in feet
-        ground_speed=raw_plane.get("gs"),                 # Ground speed in knots
         true_heading=raw_plane.get("true_heading"),       # Heading in degrees (0-360)
     )

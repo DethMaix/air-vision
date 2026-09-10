@@ -35,4 +35,4 @@ register_exception_handlers(app)
 # Main endpoint [temp]
 @app.get("/")
 async def root() -> dict:
-    return {"Hello": "World"}
+    return {"status": "Air Vision is Live!"}

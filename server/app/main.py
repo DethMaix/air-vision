@@ -10,7 +10,11 @@ from app.api.errors import register_exception_handlers
 
 
 # App initialization
-app = FastAPI()
+app = FastAPI(
+    title="Air Vision API",
+    description="Real-time aircraft telemetry and geographic flight lookups powered by ADS-B data.",
+    version="0.0.1",
+)
 
 # CORS setup
 app.add_middleware(

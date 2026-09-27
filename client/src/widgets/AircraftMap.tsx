@@ -46,6 +46,7 @@ export function AircraftMap() {
           data.map((aircraft) => (
             <AircraftMarker
               key={aircraft.registration}
+              id={aircraft.registration}
               lat={aircraft.latitude}
               lon={aircraft.longitude}
               heading={aircraft.true_heading}

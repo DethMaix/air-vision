@@ -13,7 +13,7 @@ const createAircraftIcon = (heading: number) => {
   return L.divIcon({
     className: "",
     html: `
-      <img src="${planeIcon}" style="transform: rotate(${heading - 90}deg); width=16px; height=16px;" />
+      <img src="${planeIcon}" style="transform: rotate(${heading}deg); width: 32px; height: 32px; filter: invert(44%) sepia(96%) saturate(1800%) hue-rotate(345deg) brightness(96%) contrast(92%);" />
     `,
     iconSize: [16, 16],
     iconAnchor: [8, 8],

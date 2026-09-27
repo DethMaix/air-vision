@@ -4,8 +4,8 @@ import type { AircraftParams } from "../types";
 
 export const useAircraft = (params: AircraftParams) => {
   return useQuery({
-    queryKey: ["aircraft", params],
+    queryKey: ["aircraft"],
     queryFn: () => getAircraft(params),
-    refetchInterval: 7000,
+    refetchInterval: 8000,
   });
 };
